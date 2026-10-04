@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mijn Schooldag Assistent</title>
+
+https://unpkg.com/tesseract.js@5/dist/tesseract.min.jsscript>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    font-family:Arial, sans-serif;
+    background:#eef2f7;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 12px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+    color:#1565c0;
+}
+
+input[type=file]{
+    width:100%;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:#1976d2;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    margin-bottom:10px;
+}
+
+button:hover{
+    background:#0d47a1;
+}
+
+#status{
+    margin-top:15px;
+    font-weight:bold;
+}
+
+#result{
+    margin-top:20px;
+    line-height:2;
+    font-size:18px;
+}
+
+.word{
+    color:#1565c0;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.word:hover{
+    text-decoration:underline;
+}
+
+#definitionBox{
+    margin-top:20px;
+    background:#e8f4ff;
+    border-radius:10px;
+    padding:15px;
+}
+
+.savedWords{
+    margin-top:20px;
+    background:#fff8e1;
+    border-radius:10px;
+    padding:15px;
+}
+
+.saved-item{
+    margin:5px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎓 Mijn Schooldag Assistent</h1>
+
+<h3>1️⃣ Upload een foto van je opdracht</h3>
+
+<input
+type="file"
+id="imageInput"
+accept="image/*">
+
+<button id="ocrButton">
+📷 Lees opdracht
+</button>
+
+<div id="status"></div>
+
+<div id="result"></div>
+
+<div id="definitionBox"></div>
+
+<div class="savedWords">
+
+<h3>⭐ Mijn woorden</h3>
+
+<div id="savedWordsList"></div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ==========================
+   WOORDENLIJST
+========================== */
+
+const woordenlijst = {
+
+    "oppervlakte":"Hoeveel ruimte iets inneemt.",
+
+    "rechthoek":"Een figuur met vier rechte hoeken.",
+
+    "percentage":"Een deel van honderd.",
+
+    "grafiek":"Een afbeelding met gegevens.",
+
+    "ecosysteem":"Planten, dieren en omgeving samen.",
+
+    "spanning":"Elektrische druk.",
+
+    "weerstand":"Iets dat stroom tegenhoudt.",
+
+    "cel":"Klein bouwsteentje van een organisme.",
+
+    "organisme":"Levend wezen.",
+
+    "bereken":"Reken iets uit.",
+
+    "diagram":"Tekening met gegevens.",
+
+    "gemiddelde":"Het middelste resultaat.",
+
+    "energie":"Kracht om iets te laten werken.",
+
+    "biodiversiteit":"Verschillende soorten planten en dieren.",
+
+    "stroomkring":"Pad waar elektrische stroom doorheen loopt.",
+
+    "temperatuur":"Hoe warm of koud iets is.",
+
+    "waterkringloop":"De reis van water door de natuur.",
+
+    "omtrek":"De lengte rondom een figuur.",
+
+    "inhoud":"Hoeveel ergens in past."
+
+};
+
+/* ==========================
+   OCR
+========================== */
+
+document
+.getElementById("ocrButton")
+.addEventListener("click", startOCR);
+
+async function startOCR(){
+
+    const file =
+    document
+    .getElementById("imageInput")
+    .files[0];
+
+    if(!file){
+
+        alert("Kies eerst een afbeelding.");
+
+        return;
+    }
+
+    document
+    .getElementById("status")
+    .innerHTML =
+    "⏳ Tekst herkennen...";
+
+    const result =
+    await Tesseract.recognize(
+        file,
+        "nld"
+    );
+
+    document
+    .getElementById("status")
+    .innerHTML =
+    "✅ Klaar";
+
+    toonTekst(result.data.text);
+}
+
+/* ==========================
+   WOORDEN HERKENNEN
+========================== */
+
+function toonTekst(text){
+
+    const words =
+    text.split(" ");
+
+    let html = "";
+
+    words.forEach(word => {
+
+        const clean =
+        word
+        .toLowerCase()
+        .replace(/[.,!?;:()"]/g,"");
+
+        if(woordenlijst[clean]){
+
+            html += `
+            <span
+            class="word"
+            onclick="toonBetekenis('${clean}')">
+            ${word}
+            </span>
+            ` + " ";
+
+        }else{
+
+            html += word + " ";
+
+        }
+
+    });
+
+    document
+    .getElementById("result")
+    .innerHTML = html;
+}
+
+/* ==========================
+   BETEKENIS TONEN
+========================== */
+
+function toonBetekenis(woord){
+
+    const uitleg =
+    woordenlijst[woord];
+
+    document
+    .getElementById("definitionBox")
+    .innerHTML = `
+
+    <h2>${woord}</h2>
+
+    <p>${uitleg}</p>
+
+    <button onclick="spreek('${woord}. ${uitleg}')">
+
+    🔊 Voorlezen
+
+    </button>
+
+    <button onclick="bewaarWoord('${woord}')">
+
+    ⭐ Bewaar woord
+
+    </button>
+
+    `;
+}
+
+/* ==========================
+   VOORLEZEN
+========================== */
+
+function spreek(tekst){
+
+    const speech =
+    new SpeechSynthesisUtterance();
+
+    speech.lang = "nl-NL";
+
+    speech.text = tekst;
+
+    speechSynthesis.speak(speech);
+}
+
+/* ==========================
+   OPSLAAN
+========================== */
+
+function bewaarWoord(woord){
+
+    let woorden =
+    JSON.parse(
+    localStorage.getItem("nt2woorden")
+    ) || [];
+
+    if(!woorden.includes(woord)){
+
+        woorden.push(woord);
+
+        localStorage.setItem(
+        "nt2woorden",
+        JSON.stringify(woorden)
+        );
+
+        toonOpgeslagenWoorden();
+
+        alert("Woord opgeslagen.");
+    }
+}
+
+/* ==========================
+   TONEN OPGESLAGEN WOORDEN
+========================== */
+
+function toonOpgeslagenWoorden(){
+
+    let woorden =
+    JSON.parse(
+    localStorage.getItem("nt2woorden")
+    ) || [];
+
+    let html = "";
+
+    woorden.forEach(w => {
+
+        html += `
+        <div class="saved-item">
+        ⭐ ${w}
+        </div>
+        `;
+    });
+
+    document
+    .getElementById("savedWordsList")
+    .innerHTML = html;
+}
+
+toonOpgeslagenWoorden();
+
+</script>
+
+</body>
+</html>
