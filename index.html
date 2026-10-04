@@ -3,383 +3,485 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+ 
 <title>Mijn Schooldag Assistent</title>
-
+ 
 https://unpkg.com/tesseract.js@5/dist/tesseract.min.jsscript>
-
+ 
 <style>
-
+ 
+*{
+box-sizing:border-box;
+}
+ 
 body{
-    margin:0;
-    padding:20px;
-    font-family:Arial, sans-serif;
-    background:#eef2f7;
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:#f4f7fb;
 }
-
+ 
 .container{
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:15px;
-    box-shadow:0 0 12px rgba(0,0,0,0.1);
+max-width:1200px;
+margin:auto;
+padding:20px;
 }
-
-h1{
-    text-align:center;
-    color:#1565c0;
+ 
+.hero{
+text-align:center;
+margin-bottom:30px;
 }
-
-input[type=file]{
-    width:100%;
-    margin-bottom:10px;
+ 
+.hero h1{
+color:#1e40af;
+margin-bottom:5px;
 }
-
+ 
+.hero p{
+color:#64748b;
+}
+ 
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-bottom:30px;
+}
+ 
+.card{
+background:white;
+border-radius:20px;
+padding:25px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+cursor:pointer;
+transition:.25s;
+text-align:center;
+}
+ 
+.card:hover{
+transform:translateY(-5px);
+}
+ 
+.card-icon{
+font-size:48px;
+margin-bottom:10px;
+}
+ 
+.card h3{
+margin:0;
+color:#1e3a8a;
+}
+ 
+.card p{
+color:#64748b;
+}
+ 
+.panel{
+background:white;
+border-radius:20px;
+padding:25px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+margin-bottom:20px;
+}
+ 
 button{
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:10px;
-    background:#1976d2;
-    color:white;
-    font-size:18px;
-    cursor:pointer;
-    margin-bottom:10px;
+background:#2563eb;
+border:none;
+color:white;
+padding:14px 20px;
+border-radius:12px;
+cursor:pointer;
+font-size:16px;
 }
-
+ 
 button:hover{
-    background:#0d47a1;
+background:#1d4ed8;
 }
-
-#status{
-    margin-top:15px;
-    font-weight:bold;
-}
-
-#result{
-    margin-top:20px;
-    line-height:2;
-    font-size:18px;
-}
-
+ 
 .word{
-    color:#1565c0;
-    font-weight:bold;
-    cursor:pointer;
+color:#2563eb;
+font-weight:bold;
+cursor:pointer;
 }
-
+ 
 .word:hover{
-    text-decoration:underline;
+text-decoration:underline;
 }
-
+ 
+#status{
+margin-top:15px;
+font-weight:bold;
+}
+ 
+#result{
+margin-top:20px;
+line-height:2;
+font-size:18px;
+}
+ 
 #definitionBox{
-    margin-top:20px;
-    background:#e8f4ff;
-    border-radius:10px;
-    padding:15px;
+margin-top:20px;
+background:#eef6ff;
+padding:20px;
+border-radius:15px;
 }
-
-.savedWords{
-    margin-top:20px;
-    background:#fff8e1;
-    border-radius:10px;
-    padding:15px;
-}
-
+ 
 .saved-item{
-    margin:5px 0;
+padding:8px;
+border-bottom:1px solid #eee;
 }
-
+ 
+input[type=file]{
+display:none;
+}
+ 
+.badge{
+background:#dcfce7;
+display:inline-block;
+padding:6px 12px;
+border-radius:20px;
+margin-top:10px;
+}
+ 
 </style>
-
 </head>
-
+ 
 <body>
-
+ 
 <div class="container">
-
+ 
+<div class="hero">
+ 
 <h1>🎓 Mijn Schooldag Assistent</h1>
-
-<h3>1️⃣ Upload een foto van je opdracht</h3>
-
-<bu*ton onclick="openCamera()">
-📷 Maa* een foto
-</button>
-
+ 
+<p>
+Maak een foto van een opdracht en krijg hulp bij moeilijke woorden.
+</p>
+ 
+<div class="badge">
+NT2 • VMBO • ISK • MBO
+</div>
+ 
+</div>
+ 
+<div class="cards">
+ 
+<div class="card" onclick="openCamera()">
+<div class="card-icon">📷</div>
+<h3>Foto maken</h3>
+<p>Maak een foto van je opdracht.</p>
+</div>
+ 
+<div class="card" onclick="openBestand()">
+<div class="card-icon">📄</div>
+<h3>Afbeelding kiezen</h3>
+<p>Kies een foto vanaf je apparaat.</p>
+</div>
+ 
+<div class="card" onclick="toonWoorden()">
+<div class="card-icon">⭐</div>
+<h3>Mijn woorden</h3>
+<p>Bekijk opgeslagen woorden.</p>
+</div>
+ 
+</div>
+ 
 <input
-type="*ile"
+type="file"
 id="imageInput"
-accept="image**"
-capture="environment"
-style="di*play:none;">
-
+accept="image/*"
+capture="environment">
+ 
+<div class="panel">
+ 
+<h2>📑 Opdracht analyseren</h2>
+ 
+<button onclick="startOCR()">
+Lees opdracht
+</button>
+ 
 <div id="status"></div>
-
+ 
 <div id="result"></div>
-
+ 
 <div id="definitionBox"></div>
-
-<div class="savedWords">
-
-<h3>⭐ Mijn woorden</h3>
-
+ 
+</div>
+ 
+<div class="panel">
+ 
+<h2>⭐ Mijn woorden</h2>
+ 
 <div id="savedWordsList"></div>
-
+ 
 </div>
-
+ 
 </div>
-
+ 
 <script>
-
-/* ==========================
-   WOORDENLIJST
-========================== */
-
+ 
 const woordenlijst = {
-
-    "oppervlakte":"Hoeveel ruimte iets inneemt.",
-
-    "rechthoek":"Een figuur met vier rechte hoeken.",
-
-    "percentage":"Een deel van honderd.",
-
-    "grafiek":"Een afbeelding met gegevens.",
-
-    "ecosysteem":"Planten, dieren en omgeving samen.",
-
-    "spanning":"Elektrische druk.",
-
-    "weerstand":"Iets dat stroom tegenhoudt.",
-
-    "cel":"Klein bouwsteentje van een organisme.",
-
-    "organisme":"Levend wezen.",
-
-    "bereken":"Reken iets uit.",
-
-    "diagram":"Tekening met gegevens.",
-
-    "gemiddelde":"Het middelste resultaat.",
-
-    "energie":"Kracht om iets te laten werken.",
-
-    "biodiversiteit":"Verschillende soorten planten en dieren.",
-
-    "stroomkring":"Pad waar elektrische stroom doorheen loopt.",
-
-    "temperatuur":"Hoe warm of koud iets is.",
-
-    "waterkringloop":"De reis van water door de natuur.",
-
-    "omtrek":"De lengte rondom een figuur.",
-
-    "inhoud":"Hoeveel ergens in past."
-
+ 
+"oppervlakte":"Hoeveel ruimte iets inneemt.",
+"rechthoek":"Een figuur met vier rechte hoeken.",
+"percentage":"Een deel van honderd.",
+"grafiek":"Een afbeelding met gegevens.",
+"ecosysteem":"Planten, dieren en hun omgeving.",
+"spanning":"Elektrische druk.",
+"weerstand":"Iets dat stroom tegenhoudt.",
+"stroomkring":"Pad waar elektriciteit doorheen loopt.",
+"gemiddelde":"Middelste waarde.",
+"diagram":"Tekening met gegevens.",
+"cel":"Kleinste bouwsteen van een levend organisme.",
+"temperatuur":"Hoe warm of koud iets is.",
+"omtrek":"Lengte rondom een figuur.",
+"inhoud":"Hoeveel ergens in past.",
+"energie":"Kracht om iets te laten werken."
+ 
 };
-
-/* ==========================
-   OCR
-========================== */
-
+ 
+function openCamera(){
+ 
 document
-.getElementById("ocrButton")
-.addEventListener("click", startOCR);
-
+.getElementById("imageInput")
+.click();
+ 
+}
+ 
+function openBestand(){
+ 
+document
+.getElementById("imageInput")
+.removeAttribute("capture");
+ 
+document
+.getElementById("imageInput")
+.click();
+ 
+}
+ 
 async function startOCR(){
-
-    const file =
-    document
-    .getElementById("imageInput")
-    .files[0];
-
-    if(!file){
-
-        alert("Kies eerst een afbeelding.");
-
-        return;
-    }
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    "⏳ Tekst herkennen...";
-
-    const result =
-    await Tesseract.recognize(
-        file,
-        "nld"
-    );
-
-    document
-    .getElementById("status")
-    .innerHTML =
-    "✅ Klaar";
-
-    toonTekst(result.data.text);
+ 
+const file =
+document
+.getElementById("imageInput")
+.files[0];
+ 
+if(!file){
+ 
+alert("Kies eerst een foto.");
+ 
+return;
+ 
 }
-
-/* ==========================
-   WOORDEN HERKENNEN
-========================== */
-
+ 
+document
+.getElementById("status")
+.innerHTML =
+"⏳ Tekst herkennen...";
+ 
+const result =
+await Tesseract.recognize(
+file,
+'nld',
+{
+logger: m => {
+ 
+if(m.status){
+ 
+document
+.getElementById("status")
+.innerHTML =
+"⏳ " + m.status;
+ 
+}
+ 
+}
+}
+);
+ 
+document
+.getElementById("status")
+.innerHTML =
+"✅ Analyse voltooid";
+ 
+toonTekst(
+result.data.text
+);
+ 
+}
+ 
 function toonTekst(text){
-
-    const words =
-    text.split(" ");
-
-    let html = "";
-
-    words.forEach(word => {
-
-        const clean =
-        word
-        .toLowerCase()
-        .replace(/[.,!?;:()"]/g,"");
-
-        if(woordenlijst[clean]){
-
-            html += `
-            <span
-            class="word"
-            onclick="toonBetekenis('${clean}')">
-            ${word}
-            </span>
-            ` + " ";
-
-        }else{
-
-            html += word + " ";
-
-        }
-
-    });
-
-    document
-    .getElementById("result")
-    .innerHTML = html;
+ 
+const words =
+text.split(" ");
+ 
+let html = "";
+ 
+words.forEach(word => {
+ 
+const clean =
+word
+.toLowerCase()
+.replace(/[.,!?;:()"']/g,"");
+ 
+if(woordenlijst[clean]){
+ 
+html +=
+`<span class="word"
+onclick="toonBetekenis('${clean}')">
+${word}
+</span> `;
+ 
+}else{
+ 
+html += word + " ";
+ 
 }
-
-/* ==========================
-   BETEKENIS TONEN
-========================== */
-
+ 
+});
+ 
+document
+.getElementById("result")
+.innerHTML =
+html;
+ 
+}
+ 
 function toonBetekenis(woord){
-
-    const uitleg =
-    woordenlijst[woord];
-
-    document
-    .getElementById("definitionBox")
-    .innerHTML = `
-
-    <h2>${woord}</h2>
-
-    <p>${uitleg}</p>
-
-    <button onclick="spreek('${woord}. ${uitleg}')">
-
-    🔊 Voorlezen
-
-    </button>
-
-    <button onclick="bewaarWoord('${woord}')">
-
-    ⭐ Bewaar woord
-
-    </button>
-
-    `;
+ 
+const uitleg =
+woordenlijst[woord];
+ 
+document
+.getElementById("definitionBox")
+.innerHTML =
+ 
+`
+<h2>${woord}</h2>
+ 
+<p>${uitleg}</p>
+ 
+<button onclick="spreek('${woord}. ${uitleg}')">
+🔊 Voorlezen
+</button>
+ 
+<button onclick="bewaarWoord('${woord}')">
+⭐ Bewaren
+</button>
+`;
+ 
 }
-
-/* ==========================
-   VOORLEZEN
-========================== */
-
+ 
 function spreek(tekst){
-
-    speechSynthesis.cancel();
-
-    const utterance =
-    new SpeechSynthesisUtterance(tekst);
-
-    utterance.lang = "nl-NL";
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-
-    const stemmen =
-    speechSynthesis.getVoices();
-
-    const nederlandseStem =
-    stemmen.find(v =>
-        v.lang.startsWith("nl")
-    );
-
-    if(nederlandseStem){
-        utterance.voice = nederlandseStem;
-    }
-
-    speechSynthesis.speak(utterance);
+ 
+speechSynthesis.cancel();
+ 
+const utterance =
+new SpeechSynthesisUtterance(
+tekst
+);
+ 
+utterance.lang = "nl-NL";
+utterance.rate = 0.9;
+ 
+const stemmen =
+speechSynthesis.getVoices();
+ 
+const nlStem =
+stemmen.find(v =>
+v.lang.startsWith("nl")
+);
+ 
+if(nlStem){
+ 
+utterance.voice =
+nlStem;
+ 
 }
-
+ 
+speechSynthesis.speak(
+utterance
+);
+ 
+}
+ 
 window.speechSynthesis.onvoiceschanged =
 () => {};
-/* ==========================
-   OPSLAAN
-========================== */
-
+ 
 function bewaarWoord(woord){
-
-    let woorden =
-    JSON.parse(
-    localStorage.getItem("nt2woorden")
-    ) || [];
-
-    if(!woorden.includes(woord)){
-
-        woorden.push(woord);
-
-        localStorage.setItem(
-        "nt2woorden",
-        JSON.stringify(woorden)
-        );
-
-        toonOpgeslagenWoorden();
-
-        alert("Woord opgeslagen.");
-    }
+ 
+let woorden =
+JSON.parse(
+localStorage.getItem(
+"nt2woorden"
+)
+) || [];
+ 
+if(!woorden.includes(woord)){
+ 
+woorden.push(woord);
+ 
+localStorage.setItem(
+"nt2woorden",
+JSON.stringify(
+woorden
+)
+);
+ 
+toonWoorden();
+ 
+alert(
+woord +
+" opgeslagen."
+);
+ 
 }
-
-/* ==========================
-   TONEN OPGESLAGEN WOORDEN
-========================== */
-
-function toonOpgeslagenWoorden(){
-
-    let woorden =
-    JSON.parse(
-    localStorage.getItem("nt2woorden")
-    ) || [];
-
-    let html = "";
-
-    woorden.forEach(w => {
-
-        html += `
-        <div class="saved-item">
-        ⭐ ${w}
-        </div>
-        `;
-    });
-
-    document
-    .getElementById("savedWordsList")
-    .innerHTML = html;
+ 
 }
-
-toonOpgeslagenWoorden();
-
+ 
+function toonWoorden(){
+ 
+let woorden =
+JSON.parse(
+localStorage.getItem(
+"nt2woorden"
+)
+) || [];
+ 
+let html = "";
+ 
+if(woorden.length === 0){
+ 
+html =
+"Nog geen woorden opgeslagen.";
+ 
+}else{
+ 
+woorden.forEach(w => {
+ 
+html +=
+`
+<div class="saved-item">
+⭐ ${w}
+</div>
+`;
+ 
+});
+ 
+}
+ 
+document
+.getElementById(
+"savedWordsList"
+)
+.innerHTML =
+html;
+ 
+}
+ 
+toonWoorden();
+ 
 </script>
-
+ 
 </body>
 </html>
