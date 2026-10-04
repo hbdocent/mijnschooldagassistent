@@ -296,16 +296,32 @@ function toonBetekenis(woord){
 
 function spreek(tekst){
 
-    const speech =
-    new SpeechSynthesisUtterance();
+    speechSynthesis.cancel();
 
-    speech.lang = "nl-NL";
+    const utterance =
+    new SpeechSynthesisUtterance(tekst);
 
-    speech.text = tekst;
+    utterance.lang = "nl-NL";
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
 
-    speechSynthesis.speak(speech);
+    const stemmen =
+    speechSynthesis.getVoices();
+
+    const nederlandseStem =
+    stemmen.find(v =>
+        v.lang.startsWith("nl")
+    );
+
+    if(nederlandseStem){
+        utterance.voice = nederlandseStem;
+    }
+
+    speechSynthesis.speak(utterance);
 }
 
+window.speechSynthesis.onvoiceschanged =
+() => {};
 /* ==========================
    OPSLAAN
 ========================== */
